@@ -1,1 +1,0 @@
-package github.yuanlin.domain.xxx.service;
