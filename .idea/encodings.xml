@@ -5,6 +5,8 @@
     <file url="file://$PROJECT_DIR$/ai-mcp-gateway-api/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ai-mcp-gateway-app/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ai-mcp-gateway-app/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ai-mcp-gateway-case/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ai-mcp-gateway-case/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ai-mcp-gateway-domain/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ai-mcp-gateway-domain/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ai-mcp-gateway-infrastructure/src/main/java" charset="UTF-8" />

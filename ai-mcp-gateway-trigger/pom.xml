@@ -40,6 +40,10 @@
             <groupId>github.yuanlin</groupId>
             <artifactId>ai-mcp-gateway-domain</artifactId>
         </dependency>
+        <dependency>
+            <groupId>github.yuanlin</groupId>
+            <artifactId>ai-mcp-gateway-case</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
