@@ -31,6 +31,14 @@ spring:
     connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
     connection-test-query: SELECT 1
   type: com.zaxxer.hikari.HikariDataSource
+  # spring ai
+  ai:
+    openai:
+      base-url: https://apis.itedus.cn
+      api-key: sk-UKYF0U8gqVW3GvKsBb65A90927F3431fB17906FbAe1b7f18
+      chat:
+        options:
+          model: gpt-4.1-mini
 
 # MyBatis 配置【如需使用记得打开】
 #mybatis:

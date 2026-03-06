@@ -1,4 +1,4 @@
-package github.yuanlin.domain.session.service.impl;
+package github.yuanlin.domain.session.service.management;
 
 import github.yuanlin.domain.session.model.valobj.SessionConfigVO;
 import github.yuanlin.domain.session.service.ISessionManagementService;
@@ -40,7 +40,7 @@ public class SessionManagementService implements ISessionManagementService {
 
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().multicast().onBackpressureBuffer();
 
-        String messageEndpoint = "/" + gatewayId + "/mcp/message?sessionId=" + sessionId;
+        String messageEndpoint = "/api-gateway/" + gatewayId + "/mcp/sse?sessionId=" + sessionId;
         sink.tryEmitNext(ServerSentEvent.<String>builder()
                 .event("endpoint")
                 .data(messageEndpoint)
