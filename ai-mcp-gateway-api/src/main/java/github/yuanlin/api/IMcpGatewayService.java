@@ -20,5 +20,5 @@ public interface IMcpGatewayService {
      * @param messageBody 请求消息
      * @return 响应结果
      */
-    Mono<ResponseEntity<Object>> handleMessage(String gatewayId, String sessionId, String messageBody);
+    Mono<ResponseEntity<Void>> handleMessage(String gatewayId, String sessionId, String messageBody);
 }

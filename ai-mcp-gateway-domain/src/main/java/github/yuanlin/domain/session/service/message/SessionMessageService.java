@@ -1,5 +1,6 @@
 package github.yuanlin.domain.session.service.message;
 
+import com.alibaba.fastjson.JSON;
 import github.yuanlin.domain.session.model.valobj.McpSchemaVO;
 import github.yuanlin.domain.session.model.valobj.enums.SessionMessageHandlerMethodEnum;
 import github.yuanlin.domain.session.service.ISessionMessageService;
@@ -27,23 +28,33 @@ public class SessionMessageService implements ISessionMessageService {
     Map<String, IRequestHandler> requestHandlerMap = new HashMap<>();
 
     @Override
-    public McpSchemaVO.JSONRPCResponse processHandlerMessage(McpSchemaVO.JSONRPCRequest message) {
-        String method = message.method();
-        log.info("开始处理请求，方法: {}", method);
-
-
-        SessionMessageHandlerMethodEnum sessionMessageHandlerMethodEnum = SessionMessageHandlerMethodEnum.getByMethod(method);
-        if (null == sessionMessageHandlerMethodEnum) {
-            throw new AppException(METHOD_NOT_FOUND.getCode(), METHOD_NOT_FOUND.getInfo());
+    public McpSchemaVO.JSONRPCResponse processHandlerMessage(McpSchemaVO.JSONRPCMessage message) {
+        if (message instanceof McpSchemaVO.JSONRPCResponse response) {
+            log.info("收到结果消息");
         }
 
-        String handlerName = sessionMessageHandlerMethodEnum.getHandlerName();
-        IRequestHandler requestHandler = requestHandlerMap.get(handlerName);
+        if (message instanceof McpSchemaVO.JSONRPCRequest request) {
+            String method = request.method();
+            log.info("开始处理请求，方法: {}", method);
 
-        if (null == requestHandler) {
-            throw new AppException(METHOD_NOT_FOUND.getCode(), METHOD_NOT_FOUND.getInfo());
+            SessionMessageHandlerMethodEnum sessionMessageHandlerMethodEnum = SessionMessageHandlerMethodEnum.getByMethod(method);
+            if (null == sessionMessageHandlerMethodEnum) {
+                throw new AppException(METHOD_NOT_FOUND.getCode(), METHOD_NOT_FOUND.getInfo());
+            }
+
+            String handlerName = sessionMessageHandlerMethodEnum.getHandlerName();
+            IRequestHandler requestHandler = requestHandlerMap.get(handlerName);
+
+            if (null == requestHandler) {
+                throw new AppException(METHOD_NOT_FOUND.getCode(), METHOD_NOT_FOUND.getInfo());
+            }
+
+            return requestHandler.handle(request);
         }
 
-        return requestHandler.handle(message);
+        if (message instanceof McpSchemaVO.JSONRPCNotification notification) {
+            log.info("收到即将处理的通知 {} {}", notification.method(), JSON.toJSONString(notification.params()));
+        }
+        return null;
     }
 }

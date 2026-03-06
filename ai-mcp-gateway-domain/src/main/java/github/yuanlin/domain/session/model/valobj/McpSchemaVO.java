@@ -42,6 +42,8 @@ public class McpSchemaVO {
 
         if (map.containsKey("method") && map.containsKey("id")) {
             return objectMapper.convertValue(map, JSONRPCRequest.class);
+        } else if (map.containsKey("method") && !map.containsKey("id")) {
+            return objectMapper.convertValue(map, JSONRPCNotification.class);
         } else if (map.containsKey("result") || map.containsKey("error")) {
             return objectMapper.convertValue(map, JSONRPCResponse.class);
         }
@@ -53,7 +55,7 @@ public class McpSchemaVO {
     /**
      * JSON-RPC 2.0 Message Types
      */
-    public sealed interface JSONRPCMessage permits JSONRPCRequest, JSONRPCResponse {
+    public sealed interface JSONRPCMessage permits JSONRPCRequest, JSONRPCResponse, JSONRPCNotification {
 
         String jsonrpc();
 
@@ -77,6 +79,15 @@ public class McpSchemaVO {
     ) implements JSONRPCMessage {
 
     }
+
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record JSONRPCNotification(
+            @JsonProperty("jsonrpc") String jsonrpc,
+            @JsonProperty("method") String method,
+            @JsonProperty("params") Object params) implements JSONRPCMessage {
+    }
+
 
     /**
      * 响应对象

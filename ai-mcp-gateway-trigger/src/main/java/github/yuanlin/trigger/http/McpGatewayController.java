@@ -1,15 +1,18 @@
 package github.yuanlin.trigger.http;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import github.yuanlin.api.IMcpGatewayService;
 import github.yuanlin.cases.mcp.IMcpSessionService;
 import github.yuanlin.domain.session.model.valobj.McpSchemaVO;
+import github.yuanlin.domain.session.model.valobj.SessionConfigVO;
+import github.yuanlin.domain.session.service.ISessionManagementService;
 import github.yuanlin.domain.session.service.ISessionMessageService;
 import github.yuanlin.types.enums.ResponseCode;
 import github.yuanlin.types.exception.AppException;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -31,20 +35,23 @@ import java.util.Map;
 @RequestMapping("/")
 public class McpGatewayController implements IMcpGatewayService {
 
-    @Resource
+    @javax.annotation.Resource
     private IMcpSessionService mcpSessionService;
 
-    @Resource
+    // todo 暂时调用 domain 测试，后续调用 case 编排
+    @javax.annotation.Resource
     private ISessionMessageService serviceMessageService;
 
-    public McpGatewayController() {
-        System.out.println("xxxx");
-    }
+    @Resource
+    private ISessionManagementService sessionManagementService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * 建立sse连接，创建会话
      * <br/>
-         * <a href="http://localhost:8777/api-gateway/test10001/mcp/sse">http://localhost:8777/api-gateway/test10001/mcp/sse</a>
+     * <a href="http://localhost:8777/api-gateway/test10001/mcp/sse">http://localhost:8777/api-gateway/test10001/mcp/sse</a>
      *
      * @param gatewayId 网关ID
      */
@@ -82,21 +89,33 @@ public class McpGatewayController implements IMcpGatewayService {
      */
     @PostMapping(value = "{gatewayId}/mcp/sse", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public Mono<ResponseEntity<Object>> handleMessage(@PathVariable("gatewayId") String gatewayId,
-                                                      @RequestParam String sessionId,
-                                                      @RequestBody String messageBody) {
+    public Mono<ResponseEntity<Void>> handleMessage(@PathVariable("gatewayId") String gatewayId,
+                                                    @RequestParam String sessionId,
+                                                    @RequestBody String messageBody) {
 
         try {
             log.info("处理 MCP SSE 消息，gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
+            SessionConfigVO session = sessionManagementService.getSession(sessionId);
+            if (null == session) {
+                log.warn("会话不存在或已过期，gatewayId:{} sessionId:{}", gatewayId, sessionId);
+                return Mono.just(ResponseEntity.notFound().build());
+            }
 
             McpSchemaVO.JSONRPCMessage jsonrpcMessage = McpSchemaVO.deserializeJsonRpcMessage(messageBody);
             log.info("序列化消息:{}", jsonrpcMessage.jsonrpc());
 
-            McpSchemaVO.JSONRPCResponse jsonrpcResponse = serviceMessageService.processHandlerMessage((McpSchemaVO.JSONRPCRequest) jsonrpcMessage);
-
+            // 暂时直接调用 domain，后续调整
+            McpSchemaVO.JSONRPCResponse jsonrpcResponse = serviceMessageService.processHandlerMessage(jsonrpcMessage);
+            if (null != jsonrpcResponse) {
+                String responseJson = objectMapper.writeValueAsString(jsonrpcResponse);
+                session.getSink().tryEmitNext(ServerSentEvent.<String>builder()
+                        .event("message")
+                        .data(responseJson)
+                        .build());
+            }
             log.info("调用结果:{}", JSON.toJSONString(jsonrpcResponse));
 
-            return Mono.just(ResponseEntity.ok(Map.of("status", "sent via SSE")));
+            return Mono.just(ResponseEntity.accepted().build());
         } catch (Exception e) {
             log.info("处理 MCP SSE 消息失败，gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody, e);
             return Mono.empty();
