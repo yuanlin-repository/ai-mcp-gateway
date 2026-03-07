@@ -1,5 +1,6 @@
 package github.yuanlin.infrastructure.dao;
 
+import github.yuanlin.infrastructure.dao.po.McpGatewayPO;
 import github.yuanlin.infrastructure.dao.po.McpProtocolRegistryPO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -17,5 +18,8 @@ public interface IMcpProtocolRegistryDao {
     McpProtocolRegistryPO queryById(Long id);
 
     List<McpProtocolRegistryPO> queryAll();
+
+    McpProtocolRegistryPO queryMcpProtocolRegistryByGatewayId(String gatewayId);
+
 }
 

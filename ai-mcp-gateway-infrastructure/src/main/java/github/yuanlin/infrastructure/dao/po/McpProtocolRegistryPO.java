@@ -41,6 +41,10 @@ public class McpProtocolRegistryPO {
      */
     private String toolDescription;
     /**
+     * 工具版本
+     */
+    private String toolVersion;
+    /**
      * HTTP接口地址
      */
     private String httpUrl;

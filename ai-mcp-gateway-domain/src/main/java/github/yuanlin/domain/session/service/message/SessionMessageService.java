@@ -28,7 +28,7 @@ public class SessionMessageService implements ISessionMessageService {
     Map<String, IRequestHandler> requestHandlerMap = new HashMap<>();
 
     @Override
-    public McpSchemaVO.JSONRPCResponse processHandlerMessage(McpSchemaVO.JSONRPCMessage message) {
+    public McpSchemaVO.JSONRPCResponse processHandlerMessage(String gatewayId, McpSchemaVO.JSONRPCMessage message) {
         if (message instanceof McpSchemaVO.JSONRPCResponse response) {
             log.info("收到结果消息");
         }
@@ -49,7 +49,7 @@ public class SessionMessageService implements ISessionMessageService {
                 throw new AppException(METHOD_NOT_FOUND.getCode(), METHOD_NOT_FOUND.getInfo());
             }
 
-            return requestHandler.handle(request);
+            return requestHandler.handle(gatewayId, request);
         }
 
         if (message instanceof McpSchemaVO.JSONRPCNotification notification) {

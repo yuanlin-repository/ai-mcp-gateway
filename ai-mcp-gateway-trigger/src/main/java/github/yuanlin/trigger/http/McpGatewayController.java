@@ -10,6 +10,7 @@ import github.yuanlin.domain.session.service.ISessionManagementService;
 import github.yuanlin.domain.session.service.ISessionMessageService;
 import github.yuanlin.types.enums.ResponseCode;
 import github.yuanlin.types.exception.AppException;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -35,11 +35,11 @@ import java.util.Map;
 @RequestMapping("/")
 public class McpGatewayController implements IMcpGatewayService {
 
-    @javax.annotation.Resource
+    @Resource
     private IMcpSessionService mcpSessionService;
 
     // todo 暂时调用 domain 测试，后续调用 case 编排
-    @javax.annotation.Resource
+    @Resource
     private ISessionMessageService serviceMessageService;
 
     @Resource
@@ -105,7 +105,7 @@ public class McpGatewayController implements IMcpGatewayService {
             log.info("序列化消息:{}", jsonrpcMessage.jsonrpc());
 
             // 暂时直接调用 domain，后续调整
-            McpSchemaVO.JSONRPCResponse jsonrpcResponse = serviceMessageService.processHandlerMessage(jsonrpcMessage);
+            McpSchemaVO.JSONRPCResponse jsonrpcResponse = serviceMessageService.processHandlerMessage(gatewayId, jsonrpcMessage);
             if (null != jsonrpcResponse) {
                 String responseJson = objectMapper.writeValueAsString(jsonrpcResponse);
                 session.getSink().tryEmitNext(ServerSentEvent.<String>builder()
