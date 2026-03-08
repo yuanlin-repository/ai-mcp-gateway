@@ -1,0 +1,13 @@
+{
+    "id": "f867b955-2",
+    "jsonrpc": "2.0",
+    "result": {
+        "content": [
+            {
+                "text": "{\"salary\":\"16.92\",\"dayManHour\":\"21\",\"user\":{\"userId\":\"111\",\"userName\":\"小傅哥\"}}",
+                "type": "text"
+            }
+        ],
+        "isError": "false"
+    }
+}

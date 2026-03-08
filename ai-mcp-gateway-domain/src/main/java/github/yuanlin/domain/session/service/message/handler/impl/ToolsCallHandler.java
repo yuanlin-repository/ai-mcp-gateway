@@ -1,11 +1,18 @@
 package github.yuanlin.domain.session.service.message.handler.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import github.yuanlin.domain.session.adapter.port.ISessionPort;
+import github.yuanlin.domain.session.adapter.repository.ISessionRepository;
 import github.yuanlin.domain.session.model.valobj.McpSchemaVO;
+import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayProtocolConfigVO;
 import github.yuanlin.domain.session.service.message.handler.IRequestHandler;
 import github.yuanlin.types.enums.McpErrorCodes;
+import github.yuanlin.types.exception.AppException;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -18,44 +25,40 @@ import java.util.Map;
 @Service("toolsCallHandler")
 public class ToolsCallHandler implements IRequestHandler {
 
+    @Resource
+    private ISessionRepository repository;
+
+    @Resource
+    private ISessionPort port;
+
     @Override
     public McpSchemaVO.JSONRPCResponse handle(String gatewayId, McpSchemaVO.JSONRPCRequest message) {
-        Object id = message.id();
-        Object params = message.params();
+        try {
+            McpGatewayProtocolConfigVO mcpGatewayProtocolConfigVO = repository.queryMcpGatewayProtocolConfig(gatewayId);
 
-        if (!(params instanceof Map)) {
+            McpSchemaVO.CallToolRequest callToolRequest = McpSchemaVO.unmarshalFrom(message.params(), new TypeReference<>() {
+            });
 
-            new McpSchemaVO.JSONRPCResponse.JSONRPCError(McpErrorCodes.INVALID_PARAMS, "Invalid arguments format", null);
+            Map<String, Object> argumentsObj = callToolRequest.arguments();
 
-            return new McpSchemaVO.JSONRPCResponse("2.0",
+            String name = callToolRequest.name();
+            Object result = port.toolCall(mcpGatewayProtocolConfigVO.getHttpConfig(), argumentsObj);
+
+            return new McpSchemaVO.JSONRPCResponse(McpSchemaVO.JSONRPC_VERSION, message.id(),
+                    Map.of("content", new Object[]{
+                                    Map.of(
+                                            "type", "text",
+                                            "text", result
+                                    ),
+                            },
+                            "isError", "false"
+                    ), null);
+        } catch (IOException e) {
+            return new McpSchemaVO.JSONRPCResponse(McpSchemaVO.JSONRPC_VERSION,
                     message.id(),
                     null,
-                    new McpSchemaVO.JSONRPCResponse.JSONRPCError(McpErrorCodes.INVALID_PARAMS, "无效参数 - 无效的方法参数", null));
+                    new McpSchemaVO.JSONRPCResponse.JSONRPCError(McpErrorCodes.METHOD_NOT_FOUND, "方法未找到 - 方法不存在或不可用", null));
         }
-
-        Map<String, Object> paramsMap = (Map<String, Object>) params;
-        String toolName = (String) paramsMap.get("name");
-        Object argumentsObj = paramsMap.get("arguments");
-
-        Map<String, Object> arguments = (Map<String, Object>) argumentsObj;
-
-        if ("toUpperCase".equals(toolName)) {
-            String word = arguments.get("word").toString();
-
-            return new McpSchemaVO.JSONRPCResponse("2.0", message.id(), Map.of(
-                    "content", new Object[]{
-                            Map.of(
-                                    "type", "text",
-                                    "text", word.toUpperCase()
-                            )
-                    }
-            ), null);
-        }
-
-        return new McpSchemaVO.JSONRPCResponse("2.0",
-                message.id(),
-                null,
-                new McpSchemaVO.JSONRPCResponse.JSONRPCError(McpErrorCodes.METHOD_NOT_FOUND, "方法未找到 - 方法不存在或不可用", null));
     }
 
 }

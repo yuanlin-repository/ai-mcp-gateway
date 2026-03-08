@@ -1,0 +1,17 @@
+{
+  "id": "f867b955-2",
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "JavaSDKMCPClient_getCompanyEmployee",
+    "arguments": {
+      "xxxRequest01": {
+        "city": "beijing",
+        "company": {
+          "name": "谷歌",
+          "type": "公司"
+        }
+      }
+    }
+  }
+}

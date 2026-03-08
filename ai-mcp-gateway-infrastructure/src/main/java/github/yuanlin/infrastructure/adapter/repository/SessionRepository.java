@@ -2,6 +2,7 @@ package github.yuanlin.infrastructure.adapter.repository;
 
 import github.yuanlin.domain.session.adapter.repository.ISessionRepository;
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayConfigVO;
+import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayProtocolConfigVO;
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayToolConfigVO;
 import github.yuanlin.infrastructure.dao.IMcpGatewayDao;
 import github.yuanlin.infrastructure.dao.IMcpProtocolMappingDao;
@@ -76,6 +77,21 @@ public class SessionRepository implements ISessionRepository {
                     .build());
         }
         return mcpGatewayToolConfigVOS;
+    }
+
+    @Override
+    public McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId) {
+        McpProtocolRegistryPO mcpProtocolRegistryPO = mcpProtocolRegistryDao.queryMcpProtocolRegistryByGatewayId(gatewayId);
+        if (null == mcpProtocolRegistryPO) {
+            return null;
+        }
+        McpGatewayProtocolConfigVO.HTTPConfig httpConfig = new McpGatewayProtocolConfigVO.HTTPConfig();
+        httpConfig.setHttpUrl(mcpProtocolRegistryPO.getHttpUrl());
+        httpConfig.setHttpHeaders(mcpProtocolRegistryPO.getHttpHeaders());
+        httpConfig.setHttpMethod(mcpProtocolRegistryPO.getHttpMethod());
+        httpConfig.setTimeout(mcpProtocolRegistryPO.getTimeout());
+
+        return McpGatewayProtocolConfigVO.builder().httpConfig(httpConfig).build();
     }
 
 }
