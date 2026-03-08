@@ -2,12 +2,18 @@ package github.yuanlin.infrastructure.adapter.repository;
 
 import github.yuanlin.domain.session.adapter.repository.ISessionRepository;
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayConfigVO;
+import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayToolConfigVO;
 import github.yuanlin.infrastructure.dao.IMcpGatewayDao;
+import github.yuanlin.infrastructure.dao.IMcpProtocolMappingDao;
 import github.yuanlin.infrastructure.dao.IMcpProtocolRegistryDao;
 import github.yuanlin.infrastructure.dao.po.McpGatewayPO;
+import github.yuanlin.infrastructure.dao.po.McpProtocolMappingPO;
 import github.yuanlin.infrastructure.dao.po.McpProtocolRegistryPO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yuanlin.zhou
@@ -22,6 +28,9 @@ public class SessionRepository implements ISessionRepository {
 
     @Resource
     private IMcpProtocolRegistryDao mcpProtocolRegistryDao;
+
+    @Resource
+    private IMcpProtocolMappingDao mcpProtocolMappingDao;
 
     @Override
     public McpGatewayConfigVO queryMcpGatewayConfigByGatewayId(String gatewayId) {
@@ -42,4 +51,31 @@ public class SessionRepository implements ISessionRepository {
                 .toolVersion(mcpProtocolRegistryPO.getToolVersion())
                 .build();
     }
+
+    @Override
+    public List<McpGatewayToolConfigVO> queryMcpGatewayToolConfigListByGatewayId(String gatewayId) {
+        McpProtocolMappingPO reqPO = new McpProtocolMappingPO();
+        reqPO.setGatewayId(gatewayId);
+
+        // 1. 查询协议工具映射配置
+        List<McpProtocolMappingPO> poList = mcpProtocolMappingDao.queryMcpGatewayToolConfigList(reqPO);
+
+        List<McpGatewayToolConfigVO> mcpGatewayToolConfigVOS = new ArrayList<>();
+        for (McpProtocolMappingPO po : poList) {
+            mcpGatewayToolConfigVOS.add(McpGatewayToolConfigVO.builder()
+                    .gatewayId(po.getGatewayId())
+                    .toolId(po.getToolId())
+                    .mappingType(po.getMappingType())
+                    .parentPath(po.getParentPath())
+                    .fieldName(po.getFieldName())
+                    .mcpPath(po.getMcpPath())
+                    .mcpType(po.getMcpType())
+                    .mcpDesc(po.getMcpDesc())
+                    .isRequired(po.getIsRequired())
+                    .sortOrder(po.getSortOrder())
+                    .build());
+        }
+        return mcpGatewayToolConfigVOS;
+    }
+
 }

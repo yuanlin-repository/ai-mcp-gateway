@@ -1,0 +1,26 @@
+{
+  "id": "a355a5f7-0",
+  "jsonrpc": "2.0",
+  "result": {
+    "capabilities": {
+      "completions": {},
+      "logging": {},
+      "prompts": {
+        "listChanged": true
+      },
+      "resources": {
+        "listChanged": true,
+        "subscribe": false
+      },
+      "tools": {
+        "listChanged": true
+      }
+    },
+    "instructions": "This server provides weather information tools and resources",
+    "protocolVersion": "2024-11-05",
+    "serverInfo": {
+      "name": "ai-mcp-gateway-demo-mcp-server-test",
+      "version": "1.0.0"
+    }
+  }
+}
