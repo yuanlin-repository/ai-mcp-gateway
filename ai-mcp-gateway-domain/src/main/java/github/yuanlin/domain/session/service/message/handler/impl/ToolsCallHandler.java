@@ -34,14 +34,13 @@ public class ToolsCallHandler implements IRequestHandler {
     @Override
     public McpSchemaVO.JSONRPCResponse handle(String gatewayId, McpSchemaVO.JSONRPCRequest message) {
         try {
-            McpGatewayProtocolConfigVO mcpGatewayProtocolConfigVO = repository.queryMcpGatewayProtocolConfig(gatewayId);
-
             McpSchemaVO.CallToolRequest callToolRequest = McpSchemaVO.unmarshalFrom(message.params(), new TypeReference<>() {
             });
 
+            McpGatewayProtocolConfigVO mcpGatewayProtocolConfigVO = repository.queryMcpGatewayProtocolConfig(gatewayId, callToolRequest.name());
+
             Map<String, Object> argumentsObj = callToolRequest.arguments();
 
-            String name = callToolRequest.name();
             Object result = port.toolCall(mcpGatewayProtocolConfigVO.getHttpConfig(), argumentsObj);
 
             return new McpSchemaVO.JSONRPCResponse(McpSchemaVO.JSONRPC_VERSION, message.id(),

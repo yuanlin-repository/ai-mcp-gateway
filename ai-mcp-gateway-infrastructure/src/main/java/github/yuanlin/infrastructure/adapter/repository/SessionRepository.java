@@ -4,17 +4,19 @@ import github.yuanlin.domain.session.adapter.repository.ISessionRepository;
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayConfigVO;
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayProtocolConfigVO;
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayToolConfigVO;
-import github.yuanlin.infrastructure.dao.IMcpGatewayDao;
-import github.yuanlin.infrastructure.dao.IMcpProtocolMappingDao;
-import github.yuanlin.infrastructure.dao.IMcpProtocolRegistryDao;
-import github.yuanlin.infrastructure.dao.po.McpGatewayPO;
-import github.yuanlin.infrastructure.dao.po.McpProtocolMappingPO;
-import github.yuanlin.infrastructure.dao.po.McpProtocolRegistryPO;
+import github.yuanlin.infrastructure.dao.*;
+import github.yuanlin.infrastructure.dao.po.*;
+import github.yuanlin.types.exception.AppException;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static github.yuanlin.types.enums.ResponseCode.ILLEGAL_PARAMETER;
 
 /**
  * @author yuanlin.zhou
@@ -27,8 +29,14 @@ public class SessionRepository implements ISessionRepository {
     @Resource
     private IMcpGatewayDao mcpGatewayDao;
 
+//    @Resource
+//    private IMcpProtocolRegistryDao mcpProtocolRegistryDao;
+
     @Resource
-    private IMcpProtocolRegistryDao mcpProtocolRegistryDao;
+    private IMcpGatewayToolDao mcpGatewayToolDao;
+
+    @Resource
+    private IMcpProtocolHttpDao mcpProtocolHttpDao;
 
     @Resource
     private IMcpProtocolMappingDao mcpProtocolMappingDao;
@@ -39,59 +47,96 @@ public class SessionRepository implements ISessionRepository {
         McpGatewayPO mcpGatewayPO = mcpGatewayDao.queryMcpGatewayByGatewayId(gatewayId);
         if (null == mcpGatewayPO) return null;
 
-        // 2. 查询协议注册（1:1 -> gatewayId:toolId）
-        McpProtocolRegistryPO mcpProtocolRegistryPO = mcpProtocolRegistryDao.queryMcpProtocolRegistryByGatewayId(gatewayId);
-        if (null == mcpProtocolRegistryPO) return null;
-
         return McpGatewayConfigVO.builder()
                 .gatewayId(mcpGatewayPO.getGatewayId())
                 .gatewayName(mcpGatewayPO.getGatewayName())
-                .toolId(mcpProtocolRegistryPO.getToolId())
-                .toolName(mcpProtocolRegistryPO.getToolName())
-                .toolDesc(mcpProtocolRegistryPO.getToolDescription())
-                .toolVersion(mcpProtocolRegistryPO.getToolVersion())
+                .gatewayDesc(mcpGatewayPO.getGatewayDesc())
+                .version(mcpGatewayPO.getVersion())
                 .build();
     }
 
     @Override
     public List<McpGatewayToolConfigVO> queryMcpGatewayToolConfigListByGatewayId(String gatewayId) {
-        McpProtocolMappingPO reqPO = new McpProtocolMappingPO();
-        reqPO.setGatewayId(gatewayId);
 
-        // 1. 查询协议工具映射配置
-        List<McpProtocolMappingPO> poList = mcpProtocolMappingDao.queryMcpGatewayToolConfigList(reqPO);
+        // 1.查询 gateway 的所有工具
+        List<McpGatewayToolPO> mcpGatewayToolPOS = mcpGatewayToolDao.queryMcpGatewayToolByGatewayId(gatewayId);
 
+        // 2.根据不同的协议分组为列表
+        Map<String, List<McpGatewayToolPO>> toolMap = mcpGatewayToolPOS.stream().
+                collect(Collectors.groupingBy(McpGatewayToolPO::getProtocolType));
+
+        // 3.结果列表
         List<McpGatewayToolConfigVO> mcpGatewayToolConfigVOS = new ArrayList<>();
-        for (McpProtocolMappingPO po : poList) {
-            mcpGatewayToolConfigVOS.add(McpGatewayToolConfigVO.builder()
-                    .gatewayId(po.getGatewayId())
-                    .toolId(po.getToolId())
-                    .mappingType(po.getMappingType())
-                    .parentPath(po.getParentPath())
-                    .fieldName(po.getFieldName())
-                    .mcpPath(po.getMcpPath())
-                    .mcpType(po.getMcpType())
-                    .mcpDesc(po.getMcpDesc())
-                    .isRequired(po.getIsRequired())
-                    .sortOrder(po.getSortOrder())
-                    .build());
+
+        for (Map.Entry<String, List<McpGatewayToolPO>> entry : toolMap.entrySet()) {
+            String protocolType = entry.getKey().toLowerCase();
+            List<McpGatewayToolPO> toolPOS = entry.getValue();
+
+            switch (protocolType) {
+                case "http": {
+                    for (McpGatewayToolPO mcpGatewayToolPO : toolPOS) {
+                        // 查询每个 tool 的 http 协议映射
+                        McpProtocolMappingPO reqPo = new McpProtocolMappingPO();
+                        reqPo.setProtocolId(mcpGatewayToolPO.getProtocolId());
+                        List<McpProtocolMappingPO> poList = mcpProtocolMappingDao.queryMcpGatewayToolConfigList(reqPo);
+
+                        // 构造 tool 的协议映射
+                        List<McpGatewayToolConfigVO.MappingConfig> mappingConfigs = new ArrayList<>();
+                        for (McpProtocolMappingPO po : poList) {
+                            mappingConfigs.add(McpGatewayToolConfigVO.MappingConfig.builder()
+                                    .mappingType(po.getMappingType())
+                                    .parentPath(po.getParentPath())
+                                    .fieldName(po.getFieldName())
+                                    .mcpPath(po.getMcpPath())
+                                    .mcpType(po.getMcpType())
+                                    .mcpDesc(po.getMcpDesc())
+                                    .isRequired(po.getIsRequired())
+                                    .sortOrder(po.getSortOrder())
+                                    .build());
+                        }
+                        mcpGatewayToolConfigVOS.add(McpGatewayToolConfigVO.builder()
+                                .toolId(mcpGatewayToolPO.getToolId())
+                                .toolName(mcpGatewayToolPO.getToolName())
+                                .toolDescription(mcpGatewayToolPO.getToolDescription())
+                                .toolType(mcpGatewayToolPO.getToolType())
+                                .toolVersion(mcpGatewayToolPO.getToolVersion())
+                                .mappingConfigs(mappingConfigs)
+                                .build());
+                    }
+                    break;
+                }
+                default: {
+                    throw new AppException(ILLEGAL_PARAMETER.getCode(), ILLEGAL_PARAMETER.getInfo());
+                }
+            }
         }
+
         return mcpGatewayToolConfigVOS;
     }
 
     @Override
-    public McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId) {
-        McpProtocolRegistryPO mcpProtocolRegistryPO = mcpProtocolRegistryDao.queryMcpProtocolRegistryByGatewayId(gatewayId);
-        if (null == mcpProtocolRegistryPO) {
+    public McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId, String toolName) {
+
+        // 查询 protocol_id
+        McpGatewayToolPO mcpGatewayToolPO = mcpGatewayToolDao.queryMcpGatewayToolByGatewayIdAndToolName(gatewayId, toolName);
+        if (null == mcpGatewayToolPO) {
             return null;
         }
-        McpGatewayProtocolConfigVO.HTTPConfig httpConfig = new McpGatewayProtocolConfigVO.HTTPConfig();
-        httpConfig.setHttpUrl(mcpProtocolRegistryPO.getHttpUrl());
-        httpConfig.setHttpHeaders(mcpProtocolRegistryPO.getHttpHeaders());
-        httpConfig.setHttpMethod(mcpProtocolRegistryPO.getHttpMethod());
-        httpConfig.setTimeout(mcpProtocolRegistryPO.getTimeout());
+        switch (mcpGatewayToolPO.getProtocolType()) {
+            case "http": {
+                McpProtocolHttpPO mcpProtocolHttpPO = mcpProtocolHttpDao.queryByProtocolId(mcpGatewayToolPO.getProtocolId());
+                McpGatewayProtocolConfigVO.HTTPConfig httpConfig = new McpGatewayProtocolConfigVO.HTTPConfig();
+                httpConfig.setHttpUrl(mcpProtocolHttpPO.getHttpUrl());
+                httpConfig.setHttpHeaders(mcpProtocolHttpPO.getHttpHeaders());
+                httpConfig.setHttpMethod(mcpProtocolHttpPO.getHttpMethod());
+                httpConfig.setTimeout(mcpProtocolHttpPO.getTimeout());
 
-        return McpGatewayProtocolConfigVO.builder().httpConfig(httpConfig).build();
+                return McpGatewayProtocolConfigVO.builder().httpConfig(httpConfig).build();
+            }
+            default:
+                throw new AppException(ILLEGAL_PARAMETER.getCode(), ILLEGAL_PARAMETER.getInfo());
+        }
+
     }
 
 }

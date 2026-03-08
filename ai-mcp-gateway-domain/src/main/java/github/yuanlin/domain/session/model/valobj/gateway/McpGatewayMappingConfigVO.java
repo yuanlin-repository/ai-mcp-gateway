@@ -1,29 +1,16 @@
-package github.yuanlin.infrastructure.dao.po;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Date;
+package github.yuanlin.domain.session.model.valobj.gateway;
 
 /**
- * MCP映射配置表
+ * @author yuanlin.zhou
+ * @date 2026/3/8 16:22
+ * @description TODO
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class McpProtocolMappingPO {
+public class McpGatewayMappingConfigVO {
 
     /**
-     * 主键ID
+     * 协议 id
      */
-    private Long id;
-    /**
-     * 协议ID
-     */
-    private Long protocolId;
+    private String protocolId;
     /**
      * 映射类型：request-请求参数映射，response-响应数据映射
      */
@@ -56,12 +43,4 @@ public class McpProtocolMappingPO {
      * 排序顺序（同级字段排序）
      */
     private Integer sortOrder;
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 }

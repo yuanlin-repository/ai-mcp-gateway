@@ -5,6 +5,7 @@ import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayProtocolConf
 import github.yuanlin.domain.session.model.valobj.gateway.McpGatewayToolConfigVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 会话仓储接口
@@ -14,6 +15,6 @@ public interface ISessionRepository {
 
     List<McpGatewayToolConfigVO> queryMcpGatewayToolConfigListByGatewayId(String gatewayId);
 
-    McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId);
+    McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId, String toolName);
 
 }

@@ -37,7 +37,7 @@ public class SessionPort implements ISessionPort {
 
         // 1.构建请求头
         String httpHeadersJson = httpConfig.getHttpHeaders();
-        ;
+
 
         Map<String, Object> headers = objectMapper.readValue(httpHeadersJson, Map.class);
 

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 网关协议配置，值对象
  */
@@ -18,31 +20,18 @@ public class McpGatewayConfigVO {
      * 网关ID
      */
     private String gatewayId;
-
     /**
      * 网关名称
      */
     private String gatewayName;
-
     /**
-     * 工具ID
+     * 网关描述
      */
-    private Long toolId;
-
+    private String gatewayDesc;
     /**
-     * 工具名称
+     * 网关版本
      */
-    private String toolName;
-
-    /**
-     * 工具描述
-     */
-    private String toolDesc;
-
-    /**
-     * 工具版本
-     */
-    private String toolVersion;
+    private String version;
 
 }
 

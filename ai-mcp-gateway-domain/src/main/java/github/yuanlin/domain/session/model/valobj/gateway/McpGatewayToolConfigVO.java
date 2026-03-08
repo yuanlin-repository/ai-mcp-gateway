@@ -1,10 +1,9 @@
 package github.yuanlin.domain.session.model.valobj.gateway;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 /**
  * 网关协议映射
@@ -26,36 +25,59 @@ public class McpGatewayToolConfigVO {
      */
     private Long toolId;
     /**
-     * 映射类型：request-请求参数映射，response-响应数据映射
+     * MCP工具名称（如：JavaSDKMCPClient_getCompanyEmployee）
      */
-    private String mappingType;
+    private String toolName;
     /**
-     * 父级路径（如：xxxRequest01，用于构建嵌套结构，根节点为NULL）
+     * 工具类型：function/resource
      */
-    private String parentPath;
+    private String toolType;
     /**
-     * 字段名称（如：city、company、name）
+     * 工具描述
      */
-    private String fieldName;
+    private String toolDescription;
     /**
-     * MCP完整路径（如：xxxRequest01.city、xxxRequest01.company.name）
+     * 工具版本
      */
-    private String mcpPath;
-    /**
-     * MCP数据类型：string/number/boolean/object/array
-     */
-    private String mcpType;
-    /**
-     * MCP字段描述
-     */
-    private String mcpDesc;
-    /**
-     * 是否必填：0-否，1-是（用于生成required数组）
-     */
-    private Integer isRequired;
-    /**
-     * 排序顺序（同级字段排序）
-     */
-    private Integer sortOrder;
+    private String toolVersion;
+
+    private List<MappingConfig> mappingConfigs;
+
+    @Data
+    @Builder
+    public static class MappingConfig {
+        /**
+         * 映射类型：request-请求参数映射，response-响应数据映射
+         */
+        private String mappingType;
+        /**
+         * 父级路径（如：xxxRequest01，用于构建嵌套结构，根节点为NULL）
+         */
+        private String parentPath;
+        /**
+         * 字段名称（如：city、company、name）
+         */
+        private String fieldName;
+        /**
+         * MCP完整路径（如：xxxRequest01.city、xxxRequest01.company.name）
+         */
+        private String mcpPath;
+        /**
+         * MCP数据类型：string/number/boolean/object/array
+         */
+        private String mcpType;
+        /**
+         * MCP字段描述
+         */
+        private String mcpDesc;
+        /**
+         * 是否必填：0-否，1-是（用于生成required数组）
+         */
+        private Integer isRequired;
+        /**
+         * 排序顺序（同级字段排序）
+         */
+        private Integer sortOrder;
+    }
 
 }

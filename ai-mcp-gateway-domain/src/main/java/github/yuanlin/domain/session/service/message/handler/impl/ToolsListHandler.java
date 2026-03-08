@@ -37,21 +37,17 @@ public class ToolsListHandler implements IRequestHandler {
         // 3. 构建工具列表
         List<McpSchemaVO.Tool> tools = buildTools(mcpGatewayConfigVO, mcpGatewayToolConfigVOS);
 
-
         return new McpSchemaVO.JSONRPCResponse("2.0", message.id(), Map.of("tools", tools), null);
     }
 
     private List<McpSchemaVO.Tool> buildTools(McpGatewayConfigVO gatewayConfig, List<McpGatewayToolConfigVO> toolConfigs) {
-        Map<Long, List<McpGatewayToolConfigVO>> toolsMap = toolConfigs.stream()
-                .collect(Collectors.groupingBy(McpGatewayToolConfigVO::getToolId));
 
         List<McpSchemaVO.Tool> tools = new ArrayList<>();
 
-        for (Map.Entry<Long, List<McpGatewayToolConfigVO>> entry : toolsMap.entrySet()) {
-            Long toolId = entry.getKey();
-            List<McpGatewayToolConfigVO> configs = entry.getValue();
+        for (McpGatewayToolConfigVO toolConfig : toolConfigs) {
+            List<McpGatewayToolConfigVO.MappingConfig> configs = toolConfig.getMappingConfigs();
 
-            List<McpGatewayToolConfigVO> roots = new ArrayList<>();
+            List<McpGatewayToolConfigVO.MappingConfig> roots = new ArrayList<>();
 
             configs.sort((o1, o2) -> {
                 int s1 = o1.getSortOrder() != null ? o1.getSortOrder() : 0;
@@ -61,8 +57,8 @@ public class ToolsListHandler implements IRequestHandler {
 
             // 1.生成 parent -> List<child>
             // 1.拿到根节点列表
-            Map<String, List<McpGatewayToolConfigVO>> childrenMap = new HashMap<>();
-            for (McpGatewayToolConfigVO config : configs) {
+            Map<String, List<McpGatewayToolConfigVO.MappingConfig>> childrenMap = new HashMap<>();
+            for (McpGatewayToolConfigVO.MappingConfig config : configs) {
                 if (config.getParentPath() == null) {
                     roots.add(config);
                 } else {
@@ -74,7 +70,7 @@ public class ToolsListHandler implements IRequestHandler {
             // 2.遍历每个根节点, 递归构建根节点的 properties
             List<String> required = new ArrayList<>();
             Map<String, Object> properties = new LinkedHashMap<>();
-            for (McpGatewayToolConfigVO root : roots) {
+            for (McpGatewayToolConfigVO.MappingConfig root : roots) {
                 properties.put(root.getFieldName(), buildProperty(root, childrenMap));
                 if (Integer.valueOf(1).equals(root.getIsRequired())) {
                     required.add(root.getFieldName());
@@ -94,21 +90,14 @@ public class ToolsListHandler implements IRequestHandler {
                     null
             );
 
-            // 工具描述
-            String name = "unknown-tool-" + toolId;
-            String desc = "";
-            if (gatewayConfig != null && Objects.equals(gatewayConfig.getToolId(), toolId)) {
-                name = gatewayConfig.getToolName();
-                desc = gatewayConfig.getToolDesc();
-            }
-
-            tools.add(new McpSchemaVO.Tool(name, desc, inputSchema));
+            tools.add(new McpSchemaVO.Tool(toolConfig.getToolName(), toolConfig.getToolDescription(), inputSchema));
         }
 
         return tools;
     }
 
-    private Object buildProperty(McpGatewayToolConfigVO current, Map<String, List<McpGatewayToolConfigVO>> childrenMap) {
+    private Object buildProperty(McpGatewayToolConfigVO.MappingConfig current, Map<String,
+            List<McpGatewayToolConfigVO.MappingConfig>> childrenMap) {
         Map<String, Object> property = new HashMap<>();
         property.put("type", current.getMcpType());
         if (null != current.getMcpDesc()) {
@@ -117,7 +106,7 @@ public class ToolsListHandler implements IRequestHandler {
         // 1.生成 parent -> List<child>
         // 1.拿到根节点列表
 
-        List<McpGatewayToolConfigVO> childrenList = childrenMap.get(current.getMcpPath());
+        List<McpGatewayToolConfigVO.MappingConfig> childrenList = childrenMap.get(current.getMcpPath());
 
         if (childrenList != null && !childrenList.isEmpty()) {
             List<String> required = new ArrayList<>();
@@ -130,7 +119,7 @@ public class ToolsListHandler implements IRequestHandler {
             });
 
             // 2.遍历每个根节点, 递归构建节点的 properties
-            for (McpGatewayToolConfigVO children : childrenList) {
+            for (McpGatewayToolConfigVO.MappingConfig children : childrenList) {
                 properties.put(children.getFieldName(), buildProperty(children, childrenMap));
                 if (Integer.valueOf(1).equals(children.getIsRequired())) {
                     required.add(children.getFieldName());
