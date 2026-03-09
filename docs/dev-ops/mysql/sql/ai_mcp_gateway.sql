@@ -187,6 +187,32 @@ VALUES
 UNLOCK TABLES;
 
 
+# 转储表 mcp_protocol_kafka
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `mcp_protocol_kafka`;
+
+CREATE TABLE `mcp_protocol_kafka` (
+                                     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                     `protocol_id` bigint NOT NULL COMMENT '协议ID',
+                                     `bootstrap_servers` varchar(512) NOT NULL COMMENT 'Kafka集群地址',
+                                     `topic` varchar(128) NOT NULL COMMENT '目标Topic',
+                                     `key_serializer` varchar(128) DEFAULT 'org.apache.kafka.common.serialization.StringSerializer' COMMENT 'Key序列化器',
+                                     `value_serializer` varchar(128) DEFAULT 'org.apache.kafka.common.serialization.StringSerializer' COMMENT 'Value序列化器',
+                                     `acks` varchar(16) DEFAULT '1' COMMENT '确认机制：0/1/all',
+                                     `retries` int DEFAULT '0' COMMENT '重试次数',
+                                     `batch_size` int DEFAULT '16384' COMMENT '批处理大小',
+                                     `linger_ms` int DEFAULT '1' COMMENT '批次等待时间（毫秒）',
+                                     `buffer_memory` int DEFAULT '33554432' COMMENT '缓冲区大小',
+                                     `headers` text COMMENT '消息头（JSON格式）',
+                                     `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
+                                     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                     PRIMARY KEY (`id`),
+                                     KEY `idx_protocol_id` (`protocol_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='MCP工具Kafka协议配置表';
+
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

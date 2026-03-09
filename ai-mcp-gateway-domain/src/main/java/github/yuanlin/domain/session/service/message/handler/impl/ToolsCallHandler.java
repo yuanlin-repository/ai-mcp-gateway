@@ -41,7 +41,14 @@ public class ToolsCallHandler implements IRequestHandler {
 
             Map<String, Object> argumentsObj = callToolRequest.arguments();
 
-            Object result = port.toolCall(mcpGatewayProtocolConfigVO.getHttpConfig(), argumentsObj);
+            Object result;
+            String protocolType = mcpGatewayProtocolConfigVO.getProtocolType();
+            
+            if ("kafka".equals(protocolType)) {
+                result = port.toolCall(mcpGatewayProtocolConfigVO.getKafkaConfig(), argumentsObj);
+            } else {
+                result = port.toolCall(mcpGatewayProtocolConfigVO.getHttpConfig(), argumentsObj);
+            }
 
             return new McpSchemaVO.JSONRPCResponse(McpSchemaVO.JSONRPC_VERSION, message.id(),
                     Map.of("content", new Object[]{

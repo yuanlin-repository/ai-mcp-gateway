@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="github.yuanlin.infrastructure.dao.IMcpProtocolKafkaDao">
+
+    <resultMap id="McpProtocolKafkaMap" type="github.yuanlin.infrastructure.dao.po.McpProtocolKafkaPO">
+        <id column="id" property="id"/>
+        <result column="protocol_id" property="protocolId"/>
+        <result column="bootstrap_servers" property="bootstrapServers"/>
+        <result column="topic" property="topic"/>
+        <result column="key_serializer" property="keySerializer"/>
+        <result column="value_serializer" property="valueSerializer"/>
+        <result column="acks" property="acks"/>
+        <result column="retries" property="retries"/>
+        <result column="batch_size" property="batchSize"/>
+        <result column="linger_ms" property="lingerMs"/>
+        <result column="buffer_memory" property="bufferMemory"/>
+        <result column="headers" property="headers"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="github.yuanlin.infrastructure.dao.po.McpProtocolKafkaPO" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO mcp_protocol_kafka (protocol_id, bootstrap_servers, topic, key_serializer, value_serializer, 
+                                        acks, retries, batch_size, linger_ms, buffer_memory, headers, status)
+        VALUES (#{protocolId}, #{bootstrapServers}, #{topic}, #{keySerializer}, #{valueSerializer}, 
+                #{acks}, #{retries}, #{batchSize}, #{lingerMs}, #{bufferMemory}, #{headers}, #{status})
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM mcp_protocol_kafka WHERE id = #{id}
+    </delete>
+
+    <update id="updateById" parameterType="github.yuanlin.infrastructure.dao.po.McpProtocolKafkaPO">
+        UPDATE mcp_protocol_kafka
+        SET protocol_id = #{protocolId},
+            bootstrap_servers = #{bootstrapServers},
+            topic = #{topic},
+            key_serializer = #{keySerializer},
+            value_serializer = #{valueSerializer},
+            acks = #{acks},
+            retries = #{retries},
+            batch_size = #{batchSize},
+            linger_ms = #{lingerMs},
+            buffer_memory = #{bufferMemory},
+            headers = #{headers},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="queryById" parameterType="java.lang.Long" resultMap="McpProtocolKafkaMap">
+        SELECT id, protocol_id, bootstrap_servers, topic, key_serializer, value_serializer, 
+               acks, retries, batch_size, linger_ms, buffer_memory, headers, status, create_time, update_time
+        FROM mcp_protocol_kafka
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryAll" resultMap="McpProtocolKafkaMap">
+        SELECT id, protocol_id, bootstrap_servers, topic, key_serializer, value_serializer, 
+               acks, retries, batch_size, linger_ms, buffer_memory, headers, status, create_time, update_time
+        FROM mcp_protocol_kafka
+        ORDER BY id DESC
+    </select>
+
+    <select id="queryByProtocolId" parameterType="java.lang.Long" resultMap="McpProtocolKafkaMap">
+        SELECT id, protocol_id, bootstrap_servers, topic, key_serializer, value_serializer, 
+               acks, retries, batch_size, linger_ms, buffer_memory, headers, status, create_time, update_time
+        FROM mcp_protocol_kafka
+        WHERE protocol_id = #{protocolId}
+    </select>
+
+</mapper>

@@ -14,7 +14,11 @@ import lombok.*;
 @NoArgsConstructor
 public class McpGatewayProtocolConfigVO {
 
+    private String protocolType;
+
     private HTTPConfig httpConfig;
+
+    private KafkaConfig kafkaConfig;
 
     @Data
     public static class HTTPConfig {
@@ -22,5 +26,19 @@ public class McpGatewayProtocolConfigVO {
         private String httpHeaders;
         private String httpMethod;
         private Integer timeout;
+    }
+
+    @Data
+    public static class KafkaConfig {
+        private String bootstrapServers;
+        private String topic;
+        private String keySerializer;
+        private String valueSerializer;
+        private String acks;
+        private Integer retries;
+        private String headers;
+        private Integer batchSize;
+        private Integer lingerMs;
+        private Integer bufferMemory;
     }
 }

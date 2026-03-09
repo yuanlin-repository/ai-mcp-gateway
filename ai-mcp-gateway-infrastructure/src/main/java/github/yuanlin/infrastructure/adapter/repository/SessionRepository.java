@@ -39,6 +39,9 @@ public class SessionRepository implements ISessionRepository {
     private IMcpProtocolHttpDao mcpProtocolHttpDao;
 
     @Resource
+    private IMcpProtocolKafkaDao mcpProtocolKafkaDao;
+
+    @Resource
     private IMcpProtocolMappingDao mcpProtocolMappingDao;
 
     @Override
@@ -131,7 +134,29 @@ public class SessionRepository implements ISessionRepository {
                 httpConfig.setHttpMethod(mcpProtocolHttpPO.getHttpMethod());
                 httpConfig.setTimeout(mcpProtocolHttpPO.getTimeout());
 
-                return McpGatewayProtocolConfigVO.builder().httpConfig(httpConfig).build();
+                return McpGatewayProtocolConfigVO.builder()
+                        .protocolType("http")
+                        .httpConfig(httpConfig)
+                        .build();
+            }
+            case "kafka": {
+                McpProtocolKafkaPO mcpProtocolKafkaPO = mcpProtocolKafkaDao.queryByProtocolId(mcpGatewayToolPO.getProtocolId());
+                McpGatewayProtocolConfigVO.KafkaConfig kafkaConfig = new McpGatewayProtocolConfigVO.KafkaConfig();
+                kafkaConfig.setBootstrapServers(mcpProtocolKafkaPO.getBootstrapServers());
+                kafkaConfig.setTopic(mcpProtocolKafkaPO.getTopic());
+                kafkaConfig.setKeySerializer(mcpProtocolKafkaPO.getKeySerializer());
+                kafkaConfig.setValueSerializer(mcpProtocolKafkaPO.getValueSerializer());
+                kafkaConfig.setAcks(mcpProtocolKafkaPO.getAcks());
+                kafkaConfig.setRetries(mcpProtocolKafkaPO.getRetries());
+                kafkaConfig.setHeaders(mcpProtocolKafkaPO.getHeaders());
+                kafkaConfig.setBatchSize(mcpProtocolKafkaPO.getBatchSize());
+                kafkaConfig.setLingerMs(mcpProtocolKafkaPO.getLingerMs());
+                kafkaConfig.setBufferMemory(mcpProtocolKafkaPO.getBufferMemory());
+
+                return McpGatewayProtocolConfigVO.builder()
+                        .protocolType("kafka")
+                        .kafkaConfig(kafkaConfig)
+                        .build();
             }
             default:
                 throw new AppException(ILLEGAL_PARAMETER.getCode(), ILLEGAL_PARAMETER.getInfo());

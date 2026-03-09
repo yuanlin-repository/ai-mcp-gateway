@@ -162,6 +162,13 @@
                 <artifactId>reactor-core</artifactId>
                 <version>3.7.3</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>3.2.0</version>
+            </dependency>
+
             <!-- 扳手工程；设计模式框架 -->
             <dependency>
                 <groupId>cn.bugstack.wrench</groupId>

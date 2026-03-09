@@ -9,4 +9,6 @@ import java.io.IOException;
  */
 public interface ISessionPort {
     Object toolCall(McpGatewayProtocolConfigVO.HTTPConfig httpConfig, Object params) throws IOException;
+
+    Object toolCall(McpGatewayProtocolConfigVO.KafkaConfig kafkaConfig, Object params);
 }

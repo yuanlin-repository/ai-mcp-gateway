@@ -9,6 +9,7 @@ public enum ResponseCode {
     UN_ERROR("0001", "未知失败"),
     ILLEGAL_PARAMETER("0002", "非法参数"),
     METHOD_NOT_FOUND("0003", "未找到方法"),
+    KAFKA_SEND_FAILED("0004", "Kafka消息发送失败"),
     ;
 
     private final String code;
