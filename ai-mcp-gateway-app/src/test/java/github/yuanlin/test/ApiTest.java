@@ -27,7 +27,7 @@ public class ApiTest {
     public void test_mcp() {
         ChatClient chatClient = chatClientBuilder.defaultOptions(
                         OpenAiChatOptions.builder()
-                                .model("gpt-4.1-mini")
+                                .model("qwen-max")
                                 .toolCallbacks(new SyncMcpToolCallbackProvider(sseMcpClient02()).getToolCallbacks())
                                 .build())
                 .build();
@@ -39,7 +39,7 @@ public class ApiTest {
     public McpSyncClient sseMcpClient02() {
         HttpClientSseClientTransport sseClientTransport = HttpClientSseClientTransport
                 .builder("http://127.0.0.1:8777")
-                .sseEndpoint("/api-gateway/test10001/mcp/sse")
+                .sseEndpoint("/api-gateway/gateway_001/mcp/sse")
                 .build();
 
         McpSyncClient mcpSyncClient = McpClient.sync(sseClientTransport).requestTimeout(Duration.ofMinutes(36000)).build();

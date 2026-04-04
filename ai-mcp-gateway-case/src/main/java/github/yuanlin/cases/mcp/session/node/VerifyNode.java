@@ -16,10 +16,10 @@ import reactor.core.publisher.Flux;
  * @description TODO
  */
 @Slf4j
-@Service
+@Service("mcpSessionVerifyNode")
 public class VerifyNode extends AbstractMcpSessionSupport {
 
-    @Resource
+    @Resource(name = "mcpSessionSessionNode")
     private SessionNode sessionNode;
 
     @Override

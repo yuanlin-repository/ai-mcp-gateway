@@ -15,7 +15,7 @@ import reactor.core.publisher.Flux;
  */
 @Slf4j
 @Service
-public class McpMessageService implements IMcpSessionService {
+public class McpSessionService implements IMcpSessionService {
 
     @Resource
     private DefaultMcpSessionFactory defaultMcpSessionFactory;

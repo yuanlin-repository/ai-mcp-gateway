@@ -1,5 +1,6 @@
 package github.yuanlin.domain.session.service;
 
+import github.yuanlin.domain.session.model.entity.HandleMessageCommandEntity;
 import github.yuanlin.domain.session.model.valobj.McpSchemaVO;
 
 /**
@@ -10,4 +11,6 @@ import github.yuanlin.domain.session.model.valobj.McpSchemaVO;
 public interface ISessionMessageService {
 
     McpSchemaVO.JSONRPCResponse processHandlerMessage(String gatewayId, McpSchemaVO.JSONRPCMessage message);
+
+    McpSchemaVO.JSONRPCResponse processHandlerMessage(HandleMessageCommandEntity commandEntity);
 }

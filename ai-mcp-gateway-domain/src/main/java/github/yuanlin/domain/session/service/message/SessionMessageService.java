@@ -1,6 +1,7 @@
 package github.yuanlin.domain.session.service.message;
 
 import com.alibaba.fastjson.JSON;
+import github.yuanlin.domain.session.model.entity.HandleMessageCommandEntity;
 import github.yuanlin.domain.session.model.valobj.McpSchemaVO;
 import github.yuanlin.domain.session.model.valobj.enums.SessionMessageHandlerMethodEnum;
 import github.yuanlin.domain.session.service.ISessionMessageService;
@@ -56,5 +57,10 @@ public class SessionMessageService implements ISessionMessageService {
             log.info("收到即将处理的通知 {} {}", notification.method(), JSON.toJSONString(notification.params()));
         }
         return null;
+    }
+
+    @Override
+    public McpSchemaVO.JSONRPCResponse processHandlerMessage(HandleMessageCommandEntity commandEntity) {
+        return processHandlerMessage(commandEntity.getGatewayId(), commandEntity.getJsonrpcMessage());
     }
 }

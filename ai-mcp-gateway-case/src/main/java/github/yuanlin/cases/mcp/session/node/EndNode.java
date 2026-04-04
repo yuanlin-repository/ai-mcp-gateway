@@ -18,7 +18,7 @@ import java.time.Duration;
  * @description TODO
  */
 @Slf4j
-@Service
+@Service("mcpSessionEndNode")
 public class EndNode extends AbstractMcpSessionSupport {
     @Override
     protected Flux<ServerSentEvent<String>> doApply(String requestParameter, DefaultMcpSessionFactory.DynamicContext dynamicContext) throws Exception {

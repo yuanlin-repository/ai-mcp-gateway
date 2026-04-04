@@ -73,6 +73,7 @@ public class ToolsCallHandler implements IRequestHandler {
                             "isError", "false"
                     ), null);
         } catch (IOException e) {
+            log.error("调用方法时发生错误：", e.getMessage());
             return new McpSchemaVO.JSONRPCResponse(McpSchemaVO.JSONRPC_VERSION,
                     message.id(),
                     null,

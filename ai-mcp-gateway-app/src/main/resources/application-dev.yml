@@ -34,11 +34,11 @@ spring:
   # spring ai
   ai:
     openai:
-      base-url: https://apis.itedus.cn
-      api-key: sk-UKYF0U8gqVW3GvKsBb65A90927F3431fB17906FbAe1b7f18
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: sk-358bf6c47ef34ee289d6fc10ad82c9de
       chat:
         options:
-          model: gpt-4.1-mini
+          model: qwen-max
 
   # Kafka 配置
   kafka:
